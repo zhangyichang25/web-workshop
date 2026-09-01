@@ -16,7 +16,7 @@
         width: 700px;
         margin: 20px;
         padding: 20px;
-        background-color: whitesmoke;
+        background-color: white;
         border: 2px solid blue;
       }
 
@@ -46,6 +46,7 @@
         font-size: 18px;
       }
     </style>
+    <script src="./about-me.js" defer></script>
   </head>
   <body>
     <div id="page">
@@ -89,7 +90,18 @@
         </table>
       </div>
 
-     <p><a href="./index.html">返回首页</a></p>
+      <p>
+        <button id="theme-button">切换为暗色模式</button>
+      </p>
+
+      <div class="section">
+        <h2>网易云热歌榜</h2>
+        <p id="music-info">点击下面按钮，加载并播放一首热歌。</p>
+        <p><button id="music-button">加载并播放下一首热歌</button></p>
+        <audio id="music-player" controls></audio>
+      </div>
+
+      <p><a href="./index.html">返回首页</a></p>
     </div>
   </body>
   </html>
