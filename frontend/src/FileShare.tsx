@@ -51,7 +51,11 @@ const FileShare: React.FC<FileShareProps> = ({ room, handleClose }) => {
   const [fileList, setFileList] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [searchText, setSearchText] = useState<string>("");
 
+  const filteredFileList = fileList.filter((filename) =>
+  filename.includes(searchText)
+);
   useEffect(() => {
     if (room) {
       fetchFileList(room.uuid).then(setFileList);
@@ -136,23 +140,23 @@ const FileShare: React.FC<FileShareProps> = ({ room, handleClose }) => {
         </Text>
       </Container>
       <FileList roomUUID={room.uuid} filelist={fileList} />
-      <div
+      <input
         className="need-interaction"
-        style={{ marginTop: "12px", width: "100%" }}
-      >
-        <Dragger
-          customRequest={({ file, onSuccess, onError }) => {
-            uploadFile(file as File, onSuccess, onError);
-          }}
-          showUploadList={false}
-          disabled={loading}
-        >
-          <p className="ant-upload-drag-icon">
-            {loading ? <Spin size="large" /> : <InboxOutlined />}
-          </p>
-          <p className="ant-upload-text">拖拽或点击上传文件</p>
-        </Dragger>
-      </div>
+        style={{
+          width: "calc(100% - 12px)",
+          marginBottom: "6px",
+        }}
+        placeholder="输入文件名搜索"
+        value={searchText}
+        onChange={(event) => setSearchText(event.target.value)}
+      />
+      {searchText && filteredFileList.length === 0 ? (
+        <Text size="small" style={{ marginBottom: "6px" }}>
+          未找到匹配文件
+        </Text>
+      ) : (
+        <FileList roomUUID={room.uuid} filelist={filteredFileList} />
+      )}
     </Card>
   );
 };
