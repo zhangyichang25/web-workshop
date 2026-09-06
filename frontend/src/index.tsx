@@ -11,6 +11,7 @@ import * as graphql from "./graphql";
 import Dice from "./Dice";
 import Timer from "./Timer";
 import getUser from "./getUser";
+import { PasswordResetActionPage, PasswordResetRequestPage } from "./PasswordResetPages";
 
 const MainPanel = React.lazy(() => import("./MainPanel"));
 const LoginPage = React.lazy(() => import("./LoginPage"));
@@ -158,6 +159,8 @@ const domNode = document.getElementById("root");
 const root = createRoot(domNode!);
 const router = createHashRouter([
   { path: "/login", element: <LoginPage /> },
+  { path: "/change-password/request", element: <PasswordResetRequestPage /> },
+  { path: "/change-password/action", element: <PasswordResetActionPage /> },
   { path: "*", element: <App /> },
 ]);
 root.render(

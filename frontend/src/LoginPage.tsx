@@ -48,7 +48,7 @@ const LoginPage: React.FC = () => {
   };
 
   const handleForgetPassword = () => {
-    message.info("暂未实现");
+    navigate("/change-password/request");
   };
 
   return (

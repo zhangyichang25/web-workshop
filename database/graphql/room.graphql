@@ -28,3 +28,25 @@ mutation joinRoom($user_uuid: uuid!, $room_uuid: uuid!) {
     room_uuid
   }
 }
+
+mutation updateRoomIntro($uuid: uuid!, $intro: String!) {
+  update_room_by_pk(pk_columns: {uuid: $uuid}, _set: {intro: $intro}) {
+    uuid
+    intro
+  }
+}
+
+mutation leaveRoom($user_uuid: uuid!, $room_uuid: uuid!) {
+  delete_user_room_by_pk(user_uuid: $user_uuid, room_uuid: $room_uuid) {
+    user_uuid
+  }
+}
+
+query getRoomMembers($room_uuid: uuid!) {
+  user_room(where: {room_uuid: {_eq: $room_uuid}}) {
+    user {
+      uuid
+      username
+    }
+  }
+}

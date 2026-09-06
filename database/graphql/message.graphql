@@ -24,6 +24,12 @@ mutation addMessage(
   }
 }
 
+mutation deleteMessage($uuid: uuid!) {
+  delete_message_by_pk(uuid: $uuid) {
+    uuid
+  }
+}
+
 subscription getMessagesByRoom($room_uuid: uuid!) {
   message(where: {room_uuid: {_eq: $room_uuid}}) {
     uuid

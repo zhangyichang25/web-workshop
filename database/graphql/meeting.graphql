@@ -1,0 +1,47 @@
+subscription getMeetingRecords($room_uuid: uuid!) {
+  meeting_record(where: {room_uuid: {_eq: $room_uuid}}, order_by: {created_at: asc}) {
+    uuid
+    content
+    created_at
+    updated_at
+  }
+}
+
+mutation addMeetingRecord($room_uuid: uuid!, $content: String!) {
+  insert_meeting_record_one(object: {room_uuid: $room_uuid, content: $content}) {
+    uuid
+  }
+}
+
+mutation updateMeetingRecord($uuid: uuid!, $content: String!, $updated_at: timestamp!) {
+  update_meeting_record_by_pk(
+    pk_columns: {uuid: $uuid},
+    _set: {content: $content, updated_at: $updated_at}
+  ) {
+    uuid
+  }
+}
+
+query getRoomNote($user_uuid: uuid!, $room_uuid: uuid!) {
+  room_note(where: {user_uuid: {_eq: $user_uuid}, room_uuid: {_eq: $room_uuid}}) {
+    uuid
+    content
+  }
+}
+
+mutation saveRoomNote($user_uuid: uuid!, $room_uuid: uuid!, $content: String!, $updated_at: timestamp!) {
+  insert_room_note_one(
+    object: {
+      user_uuid: $user_uuid,
+      room_uuid: $room_uuid,
+      content: $content,
+      updated_at: $updated_at
+    },
+    on_conflict: {
+      constraint: room_note_user_uuid_room_uuid_key,
+      update_columns: [content, updated_at]
+    }
+  ) {
+    uuid
+  }
+}

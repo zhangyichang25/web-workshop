@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, Form, Input, List, message, Modal } from "antd";
+import { Button, Form, Input, List, message, Modal, Popconfirm, Popover, QRCode } from "antd";
+import { gql, useMutation } from "@apollo/client";
+import axios from "axios";
 import {
   UserOutlined,
   LoginOutlined,
@@ -10,6 +12,9 @@ import {
 import * as graphql from "./graphql";
 import { Bubble, Card, Link, Scroll, Text } from "./Components";
 import { user } from "./getUser";
+
+const UPDATE_ROOM_INTRO = gql`mutation updateRoomIntro($uuid: uuid!, $intro: String!) { update_room_by_pk(pk_columns: {uuid: $uuid}, _set: {intro: $intro}) { uuid intro } }`;
+const LEAVE_ROOM = gql`mutation leaveRoom($user_uuid: uuid!, $room_uuid: uuid!) { delete_user_room_by_pk(user_uuid: $user_uuid, room_uuid: $room_uuid) { user_uuid } }`;
 
 interface MainPanelProps {
   user: user | null;
@@ -38,6 +43,18 @@ const User: React.FC<MainPanelProps> = ({ user }) => {
       navigate(0);
     } else {
       navigate("/login");
+    }
+  };
+  const deleteAccount = async () => {
+    try {
+      await axios.get("/user/delete");
+      localStorage.removeItem("token");
+      localStorage.removeItem("username");
+      message.success("账户已删除");
+      navigate("/login");
+    } catch (error) {
+      console.error(error);
+      message.error("删除账户失败");
     }
   };
 
@@ -78,6 +95,11 @@ const User: React.FC<MainPanelProps> = ({ user }) => {
       >
         {user ? <LogoutOutlined /> : <LoginOutlined />}
       </Button>
+      {user && (
+        <Popconfirm title="删除账户及其记录？此操作不可恢复。" okText="删除" okButtonProps={{ danger: true }} onConfirm={deleteAccount}>
+          <Button danger type="link" style={{ marginLeft: 4 }}>注销</Button>
+        </Popconfirm>
+      )}
     </Bubble>
   );
 };
@@ -246,6 +268,8 @@ const RoomList: React.FC<MainPanelProps> = ({
           renderItem={(item, index) => (
             <RoomListItem
               room={item.room}
+              user={user!}
+              refetchRooms={refetchRooms}
               handleOpenChat={() => addChatBox(index)}
               handleOpenFileShare={() => addFileShare(index)}
             />
@@ -285,22 +309,45 @@ const RoomList: React.FC<MainPanelProps> = ({
 
 interface RoomListItemProps {
   room: graphql.GetJoinedRoomsQuery["user_room"][0]["room"];
+  user: user;
+  refetchRooms: () => void;
   handleOpenChat: () => void;
   handleOpenFileShare: () => void;
 }
 
 const RoomListItem: React.FC<RoomListItemProps> = ({
   room,
+  user,
+  refetchRooms,
   handleOpenChat,
   handleOpenFileShare,
 }) => {
+  const [updateRoomIntro] = useMutation(UPDATE_ROOM_INTRO);
+  const [leaveRoom] = useMutation(LEAVE_ROOM);
   const dateUTC = new Date(room.created_at);
   const date = new Date(
     dateUTC.getTime() - dateUTC.getTimezoneOffset() * 60000
   );
 
-  const handleQuit = () => {
-    message.info("暂未实现");
+  const handleQuit = async () => {
+    try {
+      await leaveRoom({ variables: { user_uuid: user.uuid, room_uuid: room.uuid } });
+      message.success("已退出会议");
+      refetchRooms();
+    } catch (error) {
+      console.error(error);
+      message.error("退出会议失败");
+    }
+  };
+  const updateIntro = async (intro: string) => {
+    try {
+      await updateRoomIntro({ variables: { uuid: room.uuid, intro } });
+      message.success("会议简介已更新");
+      refetchRooms();
+    } catch (error) {
+      console.error(error);
+      message.error("修改会议简介失败");
+    }
   };
 
   return (
@@ -310,7 +357,7 @@ const RoomListItem: React.FC<RoomListItemProps> = ({
           <strong>{room.name}</strong>
         </Text>
         <br />
-        <Text size="small" editable>
+        <Text size="small" editable={{ onChange: updateIntro }}>
           {room.intro}
         </Text>
         <br />
@@ -328,6 +375,9 @@ const RoomListItem: React.FC<RoomListItemProps> = ({
         >
           邀请码 {room.invite_code}
         </Text>
+        <Popover content={<QRCode value={room.invite_code} />} title="会议邀请码二维码">
+          <Link style={{ marginLeft: "8px" }}>二维码</Link>
+        </Popover>
         <br />
         <Link style={{ marginTop: "6px" }} onClick={handleOpenChat}>
           打开聊天室
@@ -335,9 +385,9 @@ const RoomListItem: React.FC<RoomListItemProps> = ({
         <Link style={{ marginLeft: "12px" }} onClick={handleOpenFileShare}>
           打开文件共享空间
         </Link>
-        <Link danger style={{ marginLeft: "12px" }} onClick={handleQuit}>
-          退出会议
-        </Link>
+        <Popconfirm title="确定退出此会议？" okText="退出" onConfirm={handleQuit}>
+          <Link danger style={{ marginLeft: "12px" }}>退出会议</Link>
+        </Popconfirm>
       </div>
     </List.Item>
   );
