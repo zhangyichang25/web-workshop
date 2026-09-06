@@ -1,0 +1,10 @@
+services:
+  backend:
+    image: zhangyichang25/web-workshop:latest
+    restart: always
+    ports:
+      - 20248:8888
+    env_file:
+      - .local.env
+    volumes:
+      - /data/upload:/data/upload
