@@ -169,6 +169,22 @@ const FileShare: React.FC<FileShareProps> = ({ room, handleClose }) => {
           文件共享空间
         </Text>
       </Container>
+      <Dragger
+        className="need-interaction"
+        customRequest={({ file, onSuccess, onError }) => {
+          void uploadFile(file as File, onSuccess, onError);
+        }}
+        disabled={loading}
+        showUploadList={false}
+        style={{ marginBottom: "6px", padding: "8px" }}
+      >
+        <p className="ant-upload-drag-icon">
+          {loading ? <Spin /> : <InboxOutlined />}
+        </p>
+        <p className="ant-upload-text">
+          {loading ? "正在上传…" : "点击或拖入文件上传"}
+        </p>
+      </Dragger>
       <input
         className="need-interaction"
         style={{
