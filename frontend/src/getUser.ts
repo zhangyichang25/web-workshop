@@ -16,7 +16,17 @@ export interface user {
 const getUser = () => {
   const token = localStorage.getItem("token");
   if (!token) return null;
-  const payload: userJWTPayload = jwtDecode(token);
+
+  let payload: userJWTPayload;
+  try {
+    payload = jwtDecode(token);
+  } catch (error) {
+    console.warn("本地登录令牌无效，已退出登录", error);
+    localStorage.removeItem("token");
+    localStorage.removeItem("username");
+    return null;
+  }
+
   const username = localStorage.getItem("username");
   if (!username) return null;
   const user: user = {

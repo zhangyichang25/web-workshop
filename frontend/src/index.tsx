@@ -1,4 +1,4 @@
-import React, { Suspense, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { createHashRouter, RouterProvider } from "react-router-dom";
 import axios from "axios";
@@ -12,11 +12,10 @@ import Dice from "./Dice";
 import Timer from "./Timer";
 import getUser from "./getUser";
 import { PasswordResetActionPage, PasswordResetRequestPage } from "./PasswordResetPages";
-
-const MainPanel = React.lazy(() => import("./MainPanel"));
-const LoginPage = React.lazy(() => import("./LoginPage"));
-const ChatBox = React.lazy(() => import("./ChatBox"));
-const FileShare = React.lazy(() => import("./FileShare"));
+import MainPanel from "./MainPanel";
+import LoginPage from "./LoginPage";
+import ChatBox from "./ChatBox";
+import FileShare from "./FileShare";
 
 axios.defaults.baseURL = process.env.REACT_APP_BACKEND_URL!;
 axios.interceptors.request.use((config) => {
@@ -105,15 +104,13 @@ const App = () => {
 
   return (
     <div style={{ display: "inline-flex", flexWrap: "wrap" }}>
-      <Suspense fallback={null}>
-        <MainPanel
-          user={user}
-          rooms={data?.user_room}
-          refetchRooms={refetch}
-          addChatBox={addChatBox}
-          addFileShare={addFileShare}
-        />
-      </Suspense>
+      <MainPanel
+        user={user}
+        rooms={data?.user_room}
+        refetchRooms={refetch}
+        addChatBox={addChatBox}
+        addFileShare={addFileShare}
+      />
       <MyDraggable key="dice" oid="dice" {...draggableProps}>
         <Dice />
       </MyDraggable>
@@ -127,13 +124,11 @@ const App = () => {
           style={{ position: "absolute", right: 0 }}
           {...draggableProps}
         >
-          <Suspense fallback={null}>
-            <ChatBox
-              user={user}
-              room={data?.user_room[idx].room}
-              handleClose={() => removeChatBox(idx)}
-            />
-          </Suspense>
+          <ChatBox
+            user={user}
+            room={data?.user_room[idx].room}
+            handleClose={() => removeChatBox(idx)}
+          />
         </MyDraggable>
       ))}
       {fileShareList.map((idx) => (
@@ -143,12 +138,10 @@ const App = () => {
           style={{ position: "absolute", right: 0 }}
           {...draggableProps}
         >
-          <Suspense fallback={null}>
-            <FileShare
-              room={data?.user_room[idx].room}
-              handleClose={() => removeFileShare(idx)}
-            />
-          </Suspense>
+          <FileShare
+            room={data?.user_room[idx].room}
+            handleClose={() => removeFileShare(idx)}
+          />
         </MyDraggable>
       ))}
     </div>
@@ -165,10 +158,8 @@ const router = createHashRouter([
 ]);
 root.render(
   <React.StrictMode>
-    <Suspense fallback={null}>
-      <ApolloProvider client={client}>
-        <RouterProvider router={router} />
-      </ApolloProvider>
-    </Suspense>
+    <ApolloProvider client={client}>
+      <RouterProvider router={router} />
+    </ApolloProvider>
   </React.StrictMode>
 );
